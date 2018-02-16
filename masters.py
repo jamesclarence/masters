@@ -15,26 +15,32 @@ for i in year_list:
 	u = 'http://www.augusta.com/masters/historic/leaderboards/' + str(i) + 'leaderboard.shtml'
 	url_list.append(u)
 
+# Get leaderboards from url_list
+leaderboard = []
+for u in url_list: 
+	t = pd.read_html(u, header=0)
+	t_df = t[0]
+	l.append(t_df)
+
+# Concatenate leaderboard list
+l_df = pd.concat(leaderboard)
+
+# Export concatenated leaderboard list
+pd.l_df.to_csv("leaderboard.csv")
+
+
 url_dict = dict(year = year_list, url = url_list)
+# year is key, url is value
 
 # Read tables from url, assign year, and add to leaderboard variable
-leaderboard = []
-for year, url in url_dict.items(): 
-	t = pd.read_html(url, header=0)
-	t_df = t[0]
-	t_df.assign(year = str(year))
-	leaderboard.append(t_df)
-
-# for u in url_list: 
-# 	t = pd.read_html(u, header=0)
+# leaderboard = []
+# for key, value in url_dict.items(): 
+# 	t = pd.read_html(value, header=0)
 # 	t_df = t[0]
-# 	leaderboard.append(t_df)	
+# 	# t_df.assign(yr = key) # '{}'.format(key)
+# 	leaderboard.append(t_df)
 
-# specify the url
-url = 'http://www.augusta.com/masters/historic/leaderboards/1969leaderboard.shtml'
+# for key, value in url_dict.items(): print("{} IS ".format(key))
 
-# Read table from url
-table = pd.read_html(url,  header=0)
-table_df = table[0]
-table_df.assign(year = '1969')
+# for key in url_dict: print("{}: {}".format(key, url_dict[key]))
 
