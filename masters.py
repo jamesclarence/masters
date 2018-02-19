@@ -1,9 +1,9 @@
-# Get Masters Leaderboards
+# Get Masters Leaderboards from augusta.com
 
-# import libraries
+# Import libraries
 import pandas as pd
 
-# Range of years (1934-2017)
+# Range of tournament years (1934-2017)
 year_list = list(range(1934, 2018))
 
 # Remove years 1943-45 because of World War II
@@ -15,32 +15,20 @@ for i in year_list:
 	u = 'http://www.augusta.com/masters/historic/leaderboards/' + str(i) + 'leaderboard.shtml'
 	url_list.append(u)
 
-# Get leaderboards from url_list
-leaderboard = []
-for u in url_list: 
-	t = pd.read_html(u, header=0)
+# Add list of years and corresponding URLs into dictionary
+# year is key, url is value
+url_dict = dict(zip(year_list, url_list))
+
+# Read tables from url, assign year, and add to empty list
+l = []
+for k, v in url_dict.items(): 
+	t = pd.read_html(v, header=0)
 	t_df = t[0]
+	t_df = t_df.assign(year = k) # '{}'.format(key)
 	l.append(t_df)
 
-# Concatenate leaderboard list
-l_df = pd.concat(leaderboard)
+# Concatenate leaderboard list into one data frame
+l_df = pd.concat(l)
 
-# Export concatenated leaderboard list
-pd.l_df.to_csv("leaderboard.csv")
-
-
-url_dict = dict(year = year_list, url = url_list)
-# year is key, url is value
-
-# Read tables from url, assign year, and add to leaderboard variable
-# leaderboard = []
-# for key, value in url_dict.items(): 
-# 	t = pd.read_html(value, header=0)
-# 	t_df = t[0]
-# 	# t_df.assign(yr = key) # '{}'.format(key)
-# 	leaderboard.append(t_df)
-
-# for key, value in url_dict.items(): print("{} IS ".format(key))
-
-# for key in url_dict: print("{}: {}".format(key, url_dict[key]))
-
+# Export leaderboard
+l_df.to_csv("leaderboard.csv")
