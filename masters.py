@@ -24,11 +24,26 @@ l = []
 for k, v in url_dict.items(): 
 	t = pd.read_html(v, header=0)
 	t_df = t[0]
-	t_df = t_df.assign(year = k) # '{}'.format(key)
+	t_df = t_df.assign(year = k)
 	l.append(t_df)
 
 # Concatenate leaderboard list into one data frame
 l_df = pd.concat(l)
 
+# Lower column names
+l_df.columns = l_df.columns.str.lower()
+
+# Replace r4 value for Ray Billows in 1939 (Should = 76)
+l_df.iat[261, 6] = 76
+
+# Replace r4 value for Tommy Armour in 1940 (Should = 76)
+l_df.iat[301, 6] = 76
+
+# Replace r4 value for George Hamer in 1948 (Should = 75)
+l_df.iat[558, 6] = 75
+
+# Replace r3 value for Art Bell in 1948 (Should = 74)
+l_df.iat[531, 5] = 74
+
 # Export leaderboard
-l_df.to_csv("leaderboard.csv")
+l_df.to_csv("leaderboard.csv", index=False)
