@@ -46,4 +46,4 @@ l_df.iat[558, 6] = 75
 l_df.iat[531, 5] = 74
 
 # Export leaderboard
-l_df.to_csv("leaderboard.csv", index=False)
+l_df.to_csv("masters_results_augustdotcom.csv", index=False)
