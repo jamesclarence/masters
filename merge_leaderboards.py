@@ -27,7 +27,7 @@ l_export = l_concat.sort_values(by = ['year','position'])
 # Replace 'T' in position where ties (ie, 'T49' to '49')
 # If matches the pattern r"(T[0-9]{1,2})", keep the number 
 regex = re.compile(r'(?P<one>T)(?P<two>[0-9]{1,2})')
-m = pd.Series(l_concat.position)
+m = pd.Series(m.position)
 m2 = m.str.replace(regex, lambda x: x.group('two'))
 
 # Assign new position column to data frame
