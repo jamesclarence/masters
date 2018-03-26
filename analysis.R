@@ -149,20 +149,21 @@ p <- l8 %>%
 # Add each ELO score after each round to data frame df
   # Grab the most recent elo rating to calculate next elo rating
 
-x %>% 
-  filter(year == '1934', round == 'r1') %>% 
-  inner_join(p, by = c("player", "year", "round", "z_round")) %>% 
-  add_tally() %>% 
-  mutate(elo_new = (1500 + 20*((-1)*(z_round - (2 * ((1/n)/n)))))) %>% 
-  select(player, year, round, elo, elo_new)
 
-df <- data.frame()
+df <- data.frame(
+  player = character(),
+  year = integer(),
+  round = character(),
+  elo = numeric(),
+  elo_new = numeric()
+  )
 # Function to get initial ELO rating
 # Select right filter (year, round) from data frame of
   # name_clean, year, round, z_round, with no NAs
 # Join that filtered data frame with list of players and their first year, round, and initial ELO rating (1500)
 # Calculate new ELO ratings
 # y = year, r = round
+# get_elo_init('1934', 'r1')
 get_elo_init <- function(y, r) {
   x %>% 
     filter(year == y, round == r) %>% 
@@ -172,16 +173,151 @@ get_elo_init <- function(y, r) {
     select(player, year, round, elo, elo_new)
 }
 
-zr1 <- get_elo_init('1934', 'r1')
+# Function: Get first year of elo
+# first_year_elo('1934', 'r1')
+first_year_elo <- 
+  function(y_init, r_init) {
+    init <- get_elo_init(y_init, r_init)
+    
+    zr2 <- x %>% 
+      filter(year == y_init, round == 'r1r2') %>% 
+      left_join(select(init, c(player, elo = elo_new)), by = c("player", "year")) %>%
+      add_tally() %>% 
+      mutate(
+        expected_score = 1/(10-((elo-1500)/400+1)),
+        elo_new = elo + 20*((-1)*(z_round - (2*(expected_score/n))))
+      ) %>% 
+      select(player, year, round = round.x, elo, elo_new)
+    
+    zr3 <- x %>% 
+      filter(year == y_init, round == 'r1r3') %>% 
+      left_join(select(zr2, c(player, elo = elo_new)), by = c("player", "year")) %>%
+      add_tally() %>% 
+      mutate(
+        expected_score = 1/(10-((elo-1500)/400+1)),
+        elo_new = elo + 20*((-1)*(z_round - (2*(expected_score/n))))
+      ) %>% 
+      select(player, year, round = round.x, elo, elo_new)
+    
+    zr4 <- x %>% 
+      filter(year == y_init, round == 'r1r4') %>% 
+      left_join(select(zr3, c(player, elo = elo_new)), by = c("player", "year")) %>%
+      add_tally() %>% 
+      mutate(
+        expected_score = 1/(10-((elo-1500)/400+1)),
+        elo_new = elo + 20*((-1)*(z_round - (2*(expected_score/n))))
+      ) %>% 
+      select(player, year, round = round.x, elo, elo_new)
+    
+    bind_rows(init, zr2, zr3, zr4)
+  }
 
-# Attach result of get_elo_init to p
 
-# For subsequent rounds in a year, grab elo_new of player from previous round and make "elo"
-# From get_elo_init, get player, elo_new
-# Filter year and next round from scores, and then join with data from get_elo_init
-zr2 <- x %>% 
-  filter(year == '1934', round == 'r1r2') %>% 
-  left_join(select(zr1, c(player, elo = elo_new)), by = c("player", "year")) %>%
+# Function to get the next year of data
+get_next_year_of_data <- function(next_year) {
+  next_year_r1 <- x %>% 
+    filter(year == next_year, round == 'r1')
+  
+  next_year_r1
+  
+  # Select latest round of player who has played
+  max_round <- elo_1934 %>% 
+    group_by(player) %>% 
+    summarise(max_round = max(round))
+  
+  # Get ELO rating for latest round
+  latest_elo <- max_round %>% 
+    left_join(elo_1934, by = c("player", "max_round" = "round"))
+  
+  # Combine latest_elo with r1_1935 data
+  # Players not in 1934 - add 1500 elo
+  new_player_this_year <- r1_1935 %>%
+    select(player) %>% 
+    left_join(latest_elo, by = "player") %>% 
+    filter(is.na(max_round) == T) %>% 
+    mutate(elo = replace_na(elo_new, as.numeric("1500"))) %>% 
+    select(year = year.x,
+           round,
+           player, 
+           elo)
+  
+  # Players in 1935
+  played_before_this_year <- r1_1935 %>%
+    select(player) %>% 
+    left_join(latest_elo, by = "player") %>% 
+    filter(is.na(max_round) == F) %>% 
+    select(year = year.x,
+           round,
+           player,
+           elo = elo_new)
+  
+  # Combine players not in 1935 and in 1935
+  year_player_list <- rbind(new_player_this_year, played_before_this_year)
+  
+  # Get z-score in 1935 and r1
+  r1_for_calculating_elo <- r1_1935 %>% 
+    left_join(year_player_list, by = c("player", "year", "round"))
+}
+
+
+# - Grab next year data
+r1_1935 <- x %>% 
+  filter(year == '1935', round == 'r1')
+
+# - new data frame: Match on name from 1934. Initial ELO for this next year is the latest ELO from 1934 or initial rating of 1500
+r1_1935 %>% 
+  left_join(elo_1934, by = 'player')
+
+# Select latest round of player
+max_round <- elo_1934 %>% 
+  group_by(player) %>% 
+  summarise(max_round = max(round))
+
+# Get ELO rating for latest round
+latest_elo <- max_round %>% 
+  left_join(elo_1934, by = c("player", "max_round" = "round"))
+
+# Combine latest_elo with r1_1935 data
+# Players not in 1934 - add 1500 elo
+new_player_this_year <- r1_1935 %>%
+  select(player) %>% 
+  left_join(latest_elo, by = "player") %>% 
+  filter(is.na(max_round) == T) %>% 
+  mutate(elo = replace_na(elo_new, as.numeric("1500"))) %>% 
+  select(year = year.x,
+         round,
+         player, 
+         elo)
+
+# Players in 1935
+played_before_this_year <- r1_1935 %>%
+  select(player) %>% 
+  left_join(latest_elo, by = "player") %>% 
+  filter(is.na(max_round) == F) %>% 
+  select(year = year.x,
+         round,
+         player,
+         elo = elo_new)
+
+# Combine players not in 1935 and in 1935
+year_player_list <- rbind(new_player_this_year, played_before_this_year)
+
+# Get z-score in 1935 and r1
+r1_for_calculating_elo <- r1_1935 %>% 
+  left_join(year_player_list, by = c("player", "year", "round"))
+
+# ELO for 1935 R1
+elo_1935_r1 <- r1_for_calculating_elo %>% 
+add_tally() %>% 
+  mutate(
+    expected_score = 1/(10-((elo-1500)/400+1)),
+    elo_new = elo + 20*((-1)*(z_round - (2*(expected_score/n))))
+  ) %>% 
+  select(player, year, round, elo, elo_new)
+
+elo_1935_r2 <- x %>% 
+  filter(year == '1935', round == 'r1r2') %>% 
+  left_join(select(elo_1935_r1, c(player, elo = elo_new)), by = c("player", "year")) %>% 
   add_tally() %>% 
   mutate(
     expected_score = 1/(10-((elo-1500)/400+1)),
@@ -189,9 +325,9 @@ zr2 <- x %>%
   ) %>% 
   select(player, year, round = round.x, elo, elo_new)
 
-zr3 <- x %>% 
-  filter(year == '1934', round == 'r1r3') %>% 
-  left_join(select(zr2, c(player, elo = elo_new)), by = c("player", "year")) %>%
+elo_1935_r3 <- x %>% 
+  filter(year == '1935', round == 'r1r3') %>% 
+  left_join(select(elo_1935_r2, c(player, elo = elo_new)), by = c("player", "year")) %>% 
   add_tally() %>% 
   mutate(
     expected_score = 1/(10-((elo-1500)/400+1)),
@@ -199,9 +335,9 @@ zr3 <- x %>%
   ) %>% 
   select(player, year, round = round.x, elo, elo_new)
 
-zr4 <- x %>% 
-  filter(year == '1934', round == 'r1r4') %>% 
-  left_join(select(zr3, c(player, elo = elo_new)), by = c("player", "year")) %>%
+elo_1935_r4 <- x %>% 
+  filter(year == '1935', round == 'r1r4') %>% 
+  left_join(select(elo_1935_r3, c(player, elo = elo_new)), by = c("player", "year")) %>% 
   add_tally() %>% 
   mutate(
     expected_score = 1/(10-((elo-1500)/400+1)),
@@ -209,8 +345,44 @@ zr4 <- x %>%
   ) %>% 
   select(player, year, round = round.x, elo, elo_new)
 
+elo_1935 <- rbind(elo_1935_r1, elo_1935_r2, elo_1935_r3, elo_1935_r4)
 
-elo_1934 <- bind_rows(zr1, zr2, zr3, zr4)
+
+# Function in-year calculation
+function(y, r) {
+  # Round 1
+  
+  # Round 2 (r1r2)
+  
+  # Round 3 (r1r3)
+  
+  # Round 4 (r1r4)
+  
+  # Add yea
+  
+  x %>% 
+    filter(year == y, round == r) %>% 
+    left_join(select(elo_1935_r1, c(player, elo = elo_new)), by = c("player", "year")) %>% 
+    add_tally() %>% 
+    mutate(
+      expected_score = 1/(10-((elo-1500)/400+1)),
+      elo_new = elo + 20*((-1)*(z_round - (2*(expected_score/n))))
+    ) %>% 
+    select(player, year, round = round.x, elo, elo_new)
+}
+
+# - After matching the name from 1934 and the new year, get most recent ELO rating for each participant in 1934
+# - If matching on name doesn't work, make new players' ELO 1500
+# - Run ELO ratings for the new year using new data frame
+# - Combine 1934 with new year in new data frame
+# - Repeat process with new year
+
+
+
+
+
+# Before 3/24/2018 --------------------------------------------------------
+
 
 # Attach elo_1934 to p before going to 1935
 p %>% 
