@@ -145,4 +145,4 @@ p <- l8 %>%
 write_csv(p, "player_list_initial_year.csv")
 
 # File with player, year, round, and z score needed to calculate  ELO
-write_csv(p, "leaderboard_with_z_score_for_elo_calculating.csv")
+write_csv(x, "leaderboard_with_z_score_for_elo_calculating.csv")
