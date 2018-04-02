@@ -114,12 +114,14 @@ get_next_year_of_data <- function(next_year) {
   
   # Select latest round of player who has played
   max_round <- df %>% 
-    group_by(player) %>% 
-    summarise(max_round = max(round))
+    group_by(player, year) %>% 
+    summarise(max_round = max(round)) %>% 
+    mutate(rank = dense_rank(desc(year))) %>% 
+    filter(rank == 1)
   
   # Get ELO rating for latest round
   latest_elo <- max_round %>% 
-    left_join(df, by = c("player", "max_round" = "round"))
+    left_join(df, by = c("player", "year", "max_round" = "round"))
   
   # Combine latest_elo with next_year_r1 data
   # Players not in 1934 - add 1500 elo
@@ -216,6 +218,11 @@ calculate_elo <- function(y) {
 }
 
 
+
+# Notes -------------------------------------------------------------------
+
+
+
 # - After matching the name from 1934 and the new year, get most recent ELO rating for each participant in 1934
 # - If matching on name doesn't work, make new players' ELO 1500
 # - Run ELO ratings for the new year using new data frame
@@ -258,21 +265,4 @@ calculate_elo <- function(y) {
 # Probability of shooting R3 score
 # Probability of shooting R4 score
 # Probability of making the cut
-
-
-# Graphs ------------------------------------------------------------------
-# Comparison between final position and round positions
-# x axis = round_rank
-# y axis = position_new
-# fill = round
-l9 %>% 
-  filter(round == 'r1',
-         position_new != 'WD',
-         position_new != 'MC',
-         position_new != 'Disqualified',
-         position_new != 'DQ') %>% 
-  ggplot(aes(x = round_rank, y = as.integer(position_new))) +
-  geom_point() +
-  xlim(1, 99)
-  
 

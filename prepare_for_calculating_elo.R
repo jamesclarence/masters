@@ -6,7 +6,6 @@ library(tidyverse)
 
 # Read in files -----------------------------------------------------------
 
-setwd('C:/Users/fishe/Documents/masters/')
 l <- read_csv('leaderboard_mastersdotcom.csv')
 
 
