@@ -20,6 +20,7 @@ ELO calculations are located in the `elo_ratings_masters.csv` file
 - `analysis.R` - R file with functions to calculate ELO
 
 ### Functions in `analysis.R` to Calculate ELO
+
 - `first_year_elo()` - Calculates the first year of ELO in 1934.
 - `get_elo_init()` - Part of `first_year_elo()`. It grabs the first year (1934) and first round (r1) results from `leaderboard_with_z_score_for_elo_calculating.csv` and players in that round from `player_list_initial_year.csv`
 - `calculate_elo()` - Calculates every year of ELO after 1934
@@ -40,13 +41,20 @@ df <- data.frame(
 `first_year_elo(1934, 'r1')`
 
 #### Run calculate_elo() for each individual year 1934-1942, 1946-2017
-Each time `calculate_elo()` is fun, it binds to `df`
+
+Each time `calculate_elo()` is run, it binds to `df`.
+
 ```
 calculate_elo('1935')
 calculate_elo('1936')
 calculate_elo('1937')
+...
 ```  
 
+#### Export `df` after you run `calculate_elo()` through 2017
+```
+write_csv(df, "elo_ratings_masters.csv")
+```
 
 ## Notes
 - Cuts start at the Masters in 1957
