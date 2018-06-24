@@ -61,6 +61,35 @@ l6$player[l6$year == "1937" & l6$position_new == "29" & l6$player == "A. Espinos
 l6$player[l6$year == "1934" & l6$position_new == "38" & l6$player == "A. Espinosa"] <- "Abe Espinosa"
 l6$player[l6$year == "1935" & l6$position_new == "50" & l6$player == "A. Espinosa"] <- "Abe Espinosa"
 
+# Rename J Haas's
+l6$player[l6$year == "1985" & l6$position_new == "31" & l6$player == "J. Haas"] <- "Jerry Haas"
+
+# David Edwards and Danny Edwards
+l6$player[l6$year == "1977" & l6$player == "D. Edwards"] <- "Danny Edwards"
+l6$player[l6$year == "1978" & l6$player == "D. Edwards"] <- "Danny Edwards"
+l6$player[l6$year == "1982" & l6$player == "D. Edwards"] <- "Danny Edwards"
+l6$player[l6$year == "1983" & l6$player == "D. Edwards"] <- "Danny Edwards"
+l6$player[l6$year == "1984" & l6$position_new == "18" & l6$player == "D. Edwards"] <- "Danny Edwards"
+l6$player[l6$year == "1985" & l6$position_new == "47" & l6$player == "D. Edwards"] <- "Danny Edwards"
+l6$player[l6$year == "1986" & l6$position_new == "28" & l6$player == "D. Edwards"] <- "Danny Edwards"
+
+l6$player[l6$year == "1984" & l6$position_new == "3" & l6$player == "D. Edwards"] <- "David Edwards"
+l6$player[l6$year == "1985" & l6$position_new == "41" & l6$player == "D. Edwards"] <- "David Edwards"
+l6$player[l6$year == "1993" & l6$player == "D. Edwards"] <- "David Edwards"
+l6$player[l6$year == "1994" & l6$player == "D. Edwards"] <- "David Edwards"
+l6$player[l6$year == "1995" & l6$player == "D. Edwards"] <- "David Edwards"
+l6$player[l6$year == "1996" & l6$player == "D. Edwards"] <- "David Edwards"
+
+# T.C. Chens
+l6$player[l6$year == "1986" & l6$position_new == "MC" & l6$player == "T. Chen"] <- "TM Chen"
+
+l6$player[l6$year == "1986" & l6$position_new == "23" & l6$player == "T. Chen"] <- "TC Chen"
+l6$player[l6$year == "1987" & l6$player == "T. Chen"] <- "TC Chen"
+l6$player[l6$year == "1988" & l6$player == "T. Chen"] <- "TC Chen"
+l6$player[l6$year == "1989" & l6$player == "T. Chen"] <- "TC Chen"
+
+
+
 l7 <- l6 %>% mutate(name_lower = str_to_lower(player),
                     name_no_per = str_replace_all(name_lower, "\\.", ""))
 
@@ -79,17 +108,17 @@ l8 <- l7 %>% mutate(name_clean = case_when(
 ))
 
 # Unique players
-p <- l8 %>% ungroup() %>% select(name_clean) %>% distinct()
-
-# Count number rounds for each player
-p_ct <- l8 %>% 
-  group_by(name_clean) %>% 
-  filter(round_type == 'ind', is.na(score) == FALSE) %>% 
-  mutate(rd_ct = n(),
-         score_sum = sum(score),
-         rd_avg = score_sum/rd_ct) %>%
-  select(player = name_clean, rd_ct, score_sum, rd_avg) %>%
-  distinct(player, rd_ct, score_sum, rd_avg) 
+# p <- l8 %>% ungroup() %>% select(name_clean) %>% distinct()
+# 
+# # Count number rounds for each player
+# p_ct <- l8 %>% 
+#   group_by(name_clean) %>% 
+#   filter(is.na(score) == FALSE) %>% 
+#   mutate(rd_ct = n(),
+#          score_sum = sum(score),
+#          rd_avg = score_sum/rd_ct) %>%
+#   select(player = name_clean, rd_ct, score_sum, rd_avg) %>%
+#   distinct(player, rd_ct, score_sum, rd_avg) 
 
 
 # https://discgolf.ultiworld.com/2018/02/13/introducing-2017-disc-golf-elo-ratings/
