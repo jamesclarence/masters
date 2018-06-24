@@ -88,6 +88,17 @@ l6$player[l6$year == "1987" & l6$player == "T. Chen"] <- "TC Chen"
 l6$player[l6$year == "1988" & l6$player == "T. Chen"] <- "TC Chen"
 l6$player[l6$year == "1989" & l6$player == "T. Chen"] <- "TC Chen"
 
+# J Kelly
+l6$player[l6$year == "2007" & l6$position_new == "MC" & l6$player == "J. Kelly"] <- "John Kelly"
+
+l6$player[l6$year == "2002" & l6$player == "J. Kelly"] <- "Jerry Kelly"
+l6$player[l6$year == "2003" & l6$player == "J. Kelly"] <- "Jerry Kelly"
+l6$player[l6$year == "2004" & l6$player == "J. Kelly"] <- "Jerry Kelly"
+l6$player[l6$year == "2007" & l6$position_new == "5" & l6$player == "J. Kelly"] <- "Jerry Kelly"
+l6$player[l6$year == "2008" & l6$player == "J. Kelly"] <- "Jerry Kelly"
+l6$player[l6$year == "2009" & l6$player == "J. Kelly"] <- "Jerry Kelly"
+l6$player[l6$year == "2010" & l6$player == "J. Kelly"] <- "Jerry Kelly"
+l6$player[l6$year == "2011" & l6$player == "J. Kelly"] <- "Jerry Kelly"
 
 
 l7 <- l6 %>% mutate(name_lower = str_to_lower(player),
